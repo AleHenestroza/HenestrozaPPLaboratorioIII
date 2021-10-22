@@ -2,9 +2,14 @@ const $ = id => {
 	return document.getElementById(id);
 };
 
-const cargaInicial = () => {
-	cargaPersonas();
-	cargaLocalidades();
+const hideSpinner = () => {
+	$('divSpinner').classList.remove('spinner-display');
+	$('divSpinner').classList.add('hidden');
+};
+
+const showSpinner = () => {
+	$('divSpinner').classList.add('spinner-display');
+	$('divSpinner').classList.remove('hidden');
 };
 
 const cargaPersonas = () => {
@@ -12,7 +17,7 @@ const cargaPersonas = () => {
 	xhttp.onreadystatechange = function () {
 		// Sintaxis function() para no perder acceso al objeto "this"
 		if (this.readyState == 4 && this.status == 200) {
-			$('divSpinner').hidden = true;
+			hideSpinner();
 			// Parseo la respuesta
 			const res = JSON.parse(this.responseText);
 			// Cargo las personas que vienen de la respuesta
@@ -55,7 +60,7 @@ const cargaLocalidades = () => {
 	xhttp.onreadystatechange = function () {
 		// Sintaxis function() para no perder acceso al objeto "this"
 		if (this.readyState == 4 && this.status == 200) {
-			$('divSpinner').hidden = true;
+			hideSpinner();
 			// Parseo la respuesta
 			const res = JSON.parse(this.responseText);
 			// Cargo las personas que vienen de la respuesta
@@ -104,7 +109,7 @@ const updatePersona = (fila, personaJson) => {
 	const req = new XMLHttpRequest();
 	req.onreadystatechange = function () {
 		if (req.status == 200 && req.readyState == 4) {
-			$('divSpinner').hidden = true;
+			hideSpinner();
 			fila.childNodes[1].innerText = personaJson.nombre;
 			fila.childNodes[2].innerText = personaJson.apellido;
 			fila.childNodes[3].innerText = personaJson.localidad.nombre;
@@ -152,7 +157,7 @@ const eliminarPersona = (fila, id) => {
 	const req = new XMLHttpRequest();
 	req.onreadystatechange = function () {
 		if (req.status == 200 && req.readyState == 4) {
-			$('divSpinner').hidden = true;
+			hideSpinner();
 			$('tabla').removeChild(fila);
 			cerrarFormPersona();
 		}
@@ -193,13 +198,18 @@ const desplegarFormFila = event => {
 
 	// Agrego event listeners a los botones (pasandoles la fila y el id de la persona seleccioanda)
 	$('btnModificar').onclick = function () {
-		$('divSpinner').hidden = false;
+		showSpinner();
 		modificarPersona(fila, id);
 	};
 	$('btnEliminar').onclick = function () {
-		$('divSpinner').hidden = false;
+		showSpinner();
 		eliminarPersona(fila, id);
 	};
+};
+
+const cargaInicial = () => {
+	cargaPersonas();
+	cargaLocalidades();
 };
 
 window.addEventListener('load', cargaInicial);

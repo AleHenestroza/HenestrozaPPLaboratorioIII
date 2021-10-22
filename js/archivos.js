@@ -75,11 +75,97 @@ const crearOptionLocalidades = localidad => {
 	$('selectLocalidades').appendChild(option);
 };
 
-const desplegarFormFila = event => {
-	const divPersona = $('divFormPersona');
-	divPersona.hidden = false;
+const cerrarFormPersona = () => {
+	$('divFormPersona').classList.add('hidden');
+};
 
-	const tabla = $('tabla');
+const validarInputs = () => {
+	let flagNombre = true;
+	let flagSexo = true;
+	let flagApellido = true;
+
+	if ($('txtNombre').value.length < 3) {
+		$('txtNombre').style.borderColor = 'red';
+		flagNombre = false;
+	}
+
+	if ($('txtApellido').value.length < 3) {
+		$('txtApellido').style.borderColor = 'red';
+		flagApellido = false;
+	}
+
+	if (!($('male').checked || $('female').checked)) {
+		flagSexo = false;
+	}
+	return flagNombre && flagApellido && flagSexo;
+};
+
+const updatePersona = (fila, personaJson) => {
+	const req = new XMLHttpRequest();
+	req.onreadystatechange = function () {
+		if (req.status == 200 && req.readyState == 4) {
+			$('divSpinner').hidden = true;
+			fila.childNodes[1].innerText = personaJson.nombre;
+			fila.childNodes[2].innerText = personaJson.apellido;
+			fila.childNodes[3].innerText = personaJson.localidad.nombre;
+			fila.childNodes[4].innerText = personaJson.sexo;
+			cerrarFormPersona();
+		}
+	};
+	req.open('POST', 'http://localhost:3000/editar');
+	req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+	req.send(JSON.stringify(personaJson));
+};
+
+const modificarPersona = (fila, id) => {
+	if (validarInputs()) {
+		const nombreInput = $('txtNombre').value;
+		const apellidoInput = $('txtApellido').value;
+		const localidadText = $('selectLocalidades').selectedOptions[0].text; // La forma mas facil de obtener el texto de la opcion seleccionada;
+		const localidadInput = {
+			id: $('selectLocalidades').value,
+			nombre: localidadText,
+		};
+		let sexoInput;
+		if ($('male').checked) {
+			sexoInput = sexoInput = 'Male';
+			$('female').checked = false;
+		} else {
+			sexoInput = sexoInput = 'Female';
+			$('male').checked = false;
+		}
+
+		const jsonPersona = {
+			id: id,
+			nombre: nombreInput,
+			apellido: apellidoInput,
+			localidad: localidadInput,
+			sexo: sexoInput,
+		};
+
+		updatePersona(fila, jsonPersona);
+	}
+};
+
+const eliminarPersona = (fila, id) => {
+	const jsonIdPersona = { id: id };
+	const req = new XMLHttpRequest();
+	req.onreadystatechange = function () {
+		if (req.status == 200 && req.readyState == 4) {
+			$('divSpinner').hidden = true;
+			$('tabla').removeChild(fila);
+			cerrarFormPersona();
+		}
+	};
+	req.open('POST', 'http://localhost:3000/eliminar');
+	req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+	req.send(JSON.stringify(jsonIdPersona));
+};
+
+const desplegarFormFila = event => {
+	$('divFormPersona').classList.remove('hidden');
+	$('btnCerrar').onclick = cerrarFormPersona;
+
 	const fila = event.target.parentNode;
 	const id = fila.childNodes[0].innerText;
 	const nombre = fila.childNodes[1].innerText;
@@ -105,87 +191,14 @@ const desplegarFormFila = event => {
 		$('female').checked = false;
 	}
 
+	// Agrego event listeners a los botones (pasandoles la fila y el id de la persona seleccioanda)
 	$('btnModificar').onclick = function () {
-		let flagNombre = true;
-		let flagSexo = true;
-		let flagApellido = true;
-
-		if ($('txtNombre').value.length < 3) {
-			$('txtNombre').style.borderColor = 'red';
-			flagNombre = false;
-		}
-
-		if ($('txtApellido').value.length < 3) {
-			$('txtApellido').style.borderColor = 'red';
-			flagApellido = false;
-		}
-
-		if (!($('male').checked || $('female').checked)) {
-			flagSexo = false;
-		}
-
-		if (flagNombre && flagApellido && flagSexo) {
-			const nombreInput = $('txtNombre').value;
-			const apellidoInput = $('txtApellido').value;
-			const localidadText = $('selectLocalidades').selectedOptions[0].text; // La forma mas facil de obtener el texto de la opcion seleccionada;
-			const localidadInput = {
-				id: $('selectLocalidades').value,
-				nombre: localidadText,
-			};
-			let sexoInput;
-			if ($('male').checked) {
-				sexoInput = sexoInput = 'Male';
-				$('female').checked = false;
-			} else {
-				sexoInput = sexoInput = 'Female';
-				$('male').checked = false;
-			}
-
-			const jsonPersona = {
-				id: id,
-				nombre: nombreInput,
-				apellido: apellidoInput,
-				localidad: localidadInput,
-				sexo: sexoInput,
-			};
-
-			const req = new XMLHttpRequest();
-			req.onreadystatechange = function () {
-				if (req.status == 200 && req.readyState == 4) {
-					$('divSpinner').hidden = true;
-					fila.childNodes[1].innerText = nombreInput;
-					fila.childNodes[2].innerText = apellidoInput;
-					fila.childNodes[3].innerText = localidadText;
-					fila.childNodes[4].innerText = sexoInput;
-					$('divFormPersona').hidden = true;
-				}
-			};
-			req.open('POST', 'http://localhost:3000/editar');
-			req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-			req.send(JSON.stringify(jsonPersona));
-
-			$('divSpinner').hidden = false;
-		}
-	};
-
-	$('btnEliminar').onclick = function () {
-		const jsonIdPersona = { id: id };
-		const req = new XMLHttpRequest();
-		req.onreadystatechange = function () {
-			if (req.status == 200 && req.readyState == 4) {
-				$('divSpinner').hidden = true;
-				tabla.removeChild(fila);
-				$('divFormPersona').hidden = true;
-			}
-		};
-		req.open('POST', 'http://localhost:3000/eliminar');
-		req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-		req.send(JSON.stringify(jsonIdPersona));
 		$('divSpinner').hidden = false;
+		modificarPersona(fila, id);
 	};
-
-	$('btnCerrar').onclick = function () {
-		$('divFormPersona').hidden = true;
+	$('btnEliminar').onclick = function () {
+		$('divSpinner').hidden = false;
+		eliminarPersona(fila, id);
 	};
 };
 

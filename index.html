@@ -4,9 +4,55 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<title>Pimer parcial labo III</title>
 		<link rel="stylesheet" href="./css/styles.css" />
 		<script src="./js/archivos.js"></script>
 	</head>
-	<body></body>
+	<body>
+		<div id="divSpinner" class="divSpinner" hidden>
+			<div id="spinner" class="spinner"></div>
+		</div>
+		<div class="divFlex">
+			<h1>Primer Parcial de Laboratorio III</h1>
+			<table id="tabla">
+				<tr class="cabecera">
+					<th>ID</th>
+					<th>Nombre</th>
+					<th>Apellido</th>
+					<th>Localidad</th>
+					<th>Sexo</th>
+				</tr>
+			</table>
+
+			<div id="divFormPersona" hidden>
+				<input type="button" value="X" id="btnCerrar" class="btn btnCerrar" />
+
+				<label for="txtNombre">Nombre</label>
+				<input class="input-box" type="text" name="txtNombre" id="txtNombre" />
+
+				<label for="txtApellido">Apellido</label>
+				<input class="input-box" type="text" name="txtApellido" id="txtApellido" />
+
+				<label for="txtLocalidad">Localidad</label>
+				<select name="selectLocalidades" id="selectLocalidades"></select>
+
+				<label for="radioSexo"> Sexo </label>
+				<div class="radios">
+					<label for="female">
+						<input type="radio" name="sexo" id="female" value="Female" />
+						Female
+					</label>
+					<label for="male">
+						<input type="radio" name="sexo" id="male" value="Male" />
+						Male
+					</label>
+				</div>
+
+				<div class="frm-buttons">
+					<input type="button" value="Eliminar" id="btnEliminar" class="btn btnEliminar" />
+					<input type="button" value="Modificar" id="btnModificar" class="btn btnModificar" />
+				</div>
+			</div>
+		</div>
+	</body>
 </html>

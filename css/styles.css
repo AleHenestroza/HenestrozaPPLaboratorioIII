@@ -103,6 +103,10 @@ select {
 	width: 2rem;
 }
 
+/* #btnEliminar {
+	background-color: red;
+} */
+
 #btnModificar {
 	background-color: green;
 	width: 100%;

@@ -12,22 +12,38 @@ const showSpinner = () => {
 	$('divSpinner').classList.remove('hidden');
 };
 
-const getPersonas = (resolve, reject) => {
-	const xhttp = new XMLHttpRequest();
-	// onload() implica ya un readyState == 4
-	xhttp.onload = function () {
-		// Sintaxis function() para no perder acceso al objeto "this"
-		// 200 <= status < 300 indica una respuesta exitosa del servidor (la mas comun es 204)
-		if (this.status >= 200 && this.status < 300) {
-			// Parseo la respuesta
-			const personas = this.response;
-			resolve(JSON.parse(personas));
-		} else {
-			reject(this.statusText);
-		}
-	};
-	xhttp.open('GET', 'http://localhost:3000/personas', true);
-	xhttp.send();
+const getData = url => {
+	return new Promise((resolve, reject) => {
+		const xhttp = new XMLHttpRequest();
+		// onload() implica ya un readyState == 4
+		xhttp.onload = function () {
+			// Sintaxis function() para no perder acceso al objeto "this"
+			// 200 <= status < 300 indica una respuesta exitosa del servidor (la mas comun es 204)
+			if (this.status >= 200 && this.status < 300) {
+				// Parseo la respuesta
+				const personas = this.response;
+				resolve(JSON.parse(personas));
+			} else {
+				reject(this.statusText);
+			}
+		};
+		xhttp.open('GET', url, true);
+		xhttp.send();
+	});
+};
+
+const cargaPersonas = () => {
+	const request = getData('http://localhost:3000/personas');
+	request
+		.then(personas => {
+			personas.forEach(persona => {
+				crearFila(persona);
+			});
+			hideSpinner();
+		})
+		.catch(error => {
+			alert(`Hubo un error al cargar los datos.\n${error}`);
+		});
 };
 
 const crearFila = persona => {
@@ -55,47 +71,8 @@ const crearFila = persona => {
 	$('tabla').appendChild(fila);
 };
 
-const cargaPersonas = () => {
-	const request = new Promise(getPersonas);
-	request
-		.then(personas => {
-			personas.forEach(persona => {
-				crearFila(persona);
-			});
-			hideSpinner();
-		})
-		.catch(error => {
-			alert(`Hubo un error al cargar los datos.\n${error}`);
-		});
-};
-
-const getLocalidades = (resolve, reject) => {
-	const xhttp = new XMLHttpRequest();
-	// onload() implica ya un readyState == 4
-	xhttp.onload = function () {
-		// Sintaxis function() para no perder acceso al objeto "this"
-		// 200 <= status < 300 indica una respuesta exitosa del servidor (la mas comun es 204)
-		if (this.status >= 200 && this.status < 300) {
-			// Parseo la respuesta
-			const personas = this.response;
-			resolve(JSON.parse(personas));
-		} else {
-			reject(this.statusText);
-		}
-	};
-	xhttp.open('GET', 'http://localhost:3000/localidades', true);
-	xhttp.send();
-};
-
-const crearOptionLocalidades = localidad => {
-	const option = document.createElement('option');
-	option.value = localidad.id;
-	option.innerText = localidad.nombre;
-	$('selectLocalidades').appendChild(option);
-};
-
 const cargaLocalidades = () => {
-	const request = new Promise(getLocalidades);
+	const request = getData('http://localhost:3000/localidades');
 	request
 		.then(localidades => {
 			localidades.forEach(localidad => {
@@ -106,6 +83,13 @@ const cargaLocalidades = () => {
 		.catch(error => {
 			alert(`Hubo un error al cargar los datos.\n${error}`);
 		});
+};
+
+const crearOptionLocalidades = localidad => {
+	const option = document.createElement('option');
+	option.value = localidad.id;
+	option.innerText = localidad.nombre;
+	$('selectLocalidades').appendChild(option);
 };
 
 const cerrarFormPersona = () => {

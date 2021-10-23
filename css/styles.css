@@ -87,8 +87,6 @@ select {
 
 .frm-buttons {
 	margin-top: 2rem;
-	display: flex;
-	justify-content: space-between;
 }
 
 .btn {
@@ -105,12 +103,9 @@ select {
 	width: 2rem;
 }
 
-#btnEliminar {
-	background-color: red;
-}
-
 #btnModificar {
 	background-color: green;
+	width: 100%;
 }
 
 .divSpinner {

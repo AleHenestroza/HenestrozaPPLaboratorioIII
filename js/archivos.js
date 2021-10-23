@@ -133,21 +133,36 @@ const validarInputs = () => {
 	return flagNombre && flagApellido && flagSexo;
 };
 
-const updatePersona = (fila, personaJson) => {
-	const req = new XMLHttpRequest();
-	req.onreadystatechange = function () {
-		if (req.status == 200 && req.readyState == 4) {
+const updatePersona = personaJson => {
+	return new Promise((resolve, reject) => {
+		const req = new XMLHttpRequest();
+		req.onload = function () {
+			if (req.status >= 200 && req.status < 300) {
+				resolve();
+			} else {
+				reject();
+			}
+		};
+		req.open('POST', 'http://localhost:3000/editar');
+		req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+		req.send(JSON.stringify(personaJson));
+	});
+};
+
+const modificar = (fila, personaJson) => {
+	const request = updatePersona(personaJson);
+	request
+		.then(() => {
 			hideSpinner();
 			fila.childNodes[1].innerText = personaJson.nombre;
 			fila.childNodes[2].innerText = personaJson.apellido;
 			fila.childNodes[3].innerText = personaJson.localidad.nombre;
 			fila.childNodes[4].innerText = personaJson.sexo;
 			cerrarFormPersona();
-		}
-	};
-	req.open('POST', 'http://localhost:3000/editar');
-	req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-	req.send(JSON.stringify(personaJson));
+		})
+		.catch(error => {
+			alert(error);
+		});
 };
 
 const modificarPersona = (fila, id) => {
@@ -176,23 +191,8 @@ const modificarPersona = (fila, id) => {
 			sexo: sexoInput,
 		};
 
-		updatePersona(fila, jsonPersona);
+		modificar(fila, jsonPersona);
 	}
-};
-
-const eliminarPersona = (fila, id) => {
-	const jsonIdPersona = { id: id };
-	const req = new XMLHttpRequest();
-	req.onreadystatechange = function () {
-		if (req.status == 200 && req.readyState == 4) {
-			hideSpinner();
-			$('tabla').removeChild(fila);
-			cerrarFormPersona();
-		}
-	};
-	req.open('POST', 'http://localhost:3000/eliminar');
-	req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-	req.send(JSON.stringify(jsonIdPersona));
 };
 
 const desplegarFormFila = event => {
@@ -224,14 +224,10 @@ const desplegarFormFila = event => {
 		$('female').checked = false;
 	}
 
-	// Agrego event listeners a los botones (pasandoles la fila y el id de la persona seleccioanda)
+	// Agrego event listeners a modificar
 	$('btnModificar').onclick = function () {
 		showSpinner();
 		modificarPersona(fila, id);
-	};
-	$('btnEliminar').onclick = function () {
-		showSpinner();
-		eliminarPersona(fila, id);
 	};
 };
 
